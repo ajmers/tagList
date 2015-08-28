@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14C109" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="TLitem" representedClassName="TLitem" syncable="YES">
+        <attribute name="text" attributeType="String" syncable="YES"/>
+        <relationship name="item_has_tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TLtag" inverseName="tag_belongs_to_items" inverseEntity="TLtag" syncable="YES"/>
+    </entity>
+    <entity name="TLtag" representedClassName="TLtag" syncable="YES">
+        <attribute name="text" attributeType="String" syncable="YES"/>
+        <relationship name="tag_belongs_to_items" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TLitem" inverseName="item_has_tags" inverseEntity="TLitem" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="TLitem" positionX="-45" positionY="-36" width="128" height="75"/>
+        <element name="TLtag" positionX="153" positionY="-36" width="117" height="75"/>
+    </elements>
+</model>
