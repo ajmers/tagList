@@ -30,6 +30,10 @@
     _ownerItems = items;
 }
 
+-(void)dismissSelf {
+    [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+}
+
 - (void) viewDidAppear {
     NSLog(@"view will appear");
 }
@@ -59,6 +63,9 @@
     // Edit the sort key as appropriate.
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"text" ascending:NO];
     NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
+    
+    NSPredicate *tagPredicate = [NSPredicate predicateWithFormat:@"text = %@", _tag];
+    [fetchRequest setPredicate:tagPredicate];
     
     [fetchRequest setSortDescriptors:sortDescriptors];
 
@@ -146,5 +153,8 @@
     // Pass the selected object to the new view controller.
 }
 */
+- (IBAction)backWasPressed:(id)sender {
+    [self dismissSelf];
+}
 
 @end
