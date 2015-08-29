@@ -37,13 +37,14 @@
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    
+ // Pass the selected object to the new view controller.
 }
 */
 -(void)dismissSelf {
-    [self.presentingViewController
-        dismissViewControllerAnimated:YES completion:nil];
+    [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
+
 
 -(void)insertListItem {
     CoreDataStack *coreDataStack = [CoreDataStack defaultStack];
@@ -66,21 +67,27 @@
     NSArray *tagsArray = [regex matchesInString:content options:0 range:NSMakeRange(0, [content length])] ;
     
     NSMutableArray *matches = [NSMutableArray arrayWithCapacity:[tagsArray count]];
-
+    NSSet *tagsSet = [NSSet setWithArray:tagsArray];
+    [entry addItem_has_tags:tagsSet];
+    
     for (NSTextCheckingResult *match in tagsArray) {
         NSRange matchRange = [match rangeAtIndex:1];
+        
         TLtag *tag = [NSEntityDescription insertNewObjectForEntityForName:@"TLtag"
                                                       inManagedObjectContext:coreDataStack.managedObjectContext];
         NSString* tagName = [content substringWithRange:matchRange];
-        NSString* strippedTagName = [tagName stringByReplacingOccurrencesOfString:@"#" withString:@""];
-        [tag setText:strippedTagName];
-        [tag addTag_belongs_to_itemsObject:entry];
+
+        [tag setText:tagName];
+        NSSet *entrySet = [NSSet setWithObject:entry];
+        [tag addTag_belongs_to_itemsObject:entrySet];
         
-        [matches addObject:strippedTagName];
+        //[matches addObject:tagName];
         NSLog(@"%@", [matches lastObject]);
     }
     
-    //[coreDataStack saveContext];
+    [coreDataStack saveContext];
+
+    
 }
 
 - (IBAction)doneWasPressed:(id)sender {

@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CoreDataStack.h"
 
 @interface EntryListTableViewController : UITableViewController
+
+@property (nonatomic, strong) NSString *tag;
 
 @end

@@ -7,6 +7,8 @@
 //
 
 #import "AppDelegate.h"
+#import "CoreDataStack.h"
+#import "EntryListTableViewController.h"
 
 @interface AppDelegate ()
 

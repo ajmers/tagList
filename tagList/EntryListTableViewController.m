@@ -20,13 +20,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+
     [self.fetchedResultsController performFetch:nil];
+    TLtag *tag = [[[self fetchedResultsController] fetchedObjects] objectAtIndex:0];
+}
+
+- (void) viewDidAppear {
+    NSLog(@"view will appear");
 }
 
 - (void)didReceiveMemoryWarning {
@@ -48,8 +48,17 @@
 }
 
 - (NSFetchRequest *)entryListFetchRequest {
-    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TLitem"];
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TLtag"];
     
+    // Edit the sort key as appropriate.
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"text" ascending:NO];
+    NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text == %@", _tag];
+    [fetchRequest setPredicate:predicate];
+    
+    [fetchRequest setSortDescriptors:sortDescriptors];
+
     return fetchRequest;
 }
 
@@ -76,6 +85,15 @@
     cell.textLabel.text = entry.text;
     
     return cell;
+}
+
+
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath
+                                                                    *)indexPath {
+    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
 }
 
 -(void)controllerDidChangeContent:(NSFetchedResultsController *)controller {
