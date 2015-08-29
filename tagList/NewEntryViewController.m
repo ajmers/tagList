@@ -64,25 +64,20 @@
     
     [entry setText:trimmedContentNoTags];
     
-    NSArray *tagsArray = [regex matchesInString:content options:0 range:NSMakeRange(0, [content length])] ;
+    NSArray *tagsArray = [regex matchesInString:content options:0 range:NSMakeRange(0, [content length])];
+    NSSet* tagsSet = [[NSSet alloc] initWithArray:tagsArray];
+    //[entry addTags:tagsSet];
     
     NSMutableArray *matches = [NSMutableArray arrayWithCapacity:[tagsArray count]];
-    NSSet *tagsSet = [NSSet setWithArray:tagsArray];
-    [entry addItem_has_tags:tagsSet];
-    
+
     for (NSTextCheckingResult *match in tagsArray) {
         NSRange matchRange = [match rangeAtIndex:1];
-        
         TLtag *tag = [NSEntityDescription insertNewObjectForEntityForName:@"TLtag"
                                                       inManagedObjectContext:coreDataStack.managedObjectContext];
         NSString* tagName = [content substringWithRange:matchRange];
-
         [tag setText:tagName];
-        NSSet *entrySet = [NSSet setWithObject:entry];
-        [tag addTag_belongs_to_itemsObject:entrySet];
-        
-        //[matches addObject:tagName];
-        NSLog(@"%@", [matches lastObject]);
+        [entry addTagsObject:tag];
+        [tag addItemsObject:entry];
     }
     
     [coreDataStack saveContext];

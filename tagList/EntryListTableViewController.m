@@ -9,10 +9,12 @@
 #import "EntryListTableViewController.h"
 #import "CoreDataStack.h"
 #import "TLitem.h"
+#import "TLtag.h"
 
 @interface EntryListTableViewController () <NSFetchedResultsControllerDelegate>
 
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultsController;
+@property (nonatomic, strong) NSArray *ownerItems;
 
 @end
 
@@ -23,6 +25,9 @@
 
     [self.fetchedResultsController performFetch:nil];
     TLtag *tag = [[[self fetchedResultsController] fetchedObjects] objectAtIndex:0];
+
+    NSArray *items = [[tag valueForKey:@"items"] allObjects];
+    _ownerItems = items;
 }
 
 - (void) viewDidAppear {
@@ -38,13 +43,14 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     // Return the number of sections.
-    return self.fetchedResultsController.sections.count;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    id <NSFetchedResultsSectionInfo> sectionInfo = [self.fetchedResultsController sections][section];
-    return [sectionInfo numberOfObjects];
+    //id <NSFetchedResultsSectionInfo> sectionInfo = [self.ownerItems sections][section];
+    //return [sectionInfo numberOfObjects];
     // Return the number of rows in the section.
+    return [_ownerItems count];
 }
 
 - (NSFetchRequest *)entryListFetchRequest {
@@ -53,9 +59,6 @@
     // Edit the sort key as appropriate.
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"text" ascending:NO];
     NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
-    
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text == %@", _tag];
-    [fetchRequest setPredicate:predicate];
     
     [fetchRequest setSortDescriptors:sortDescriptors];
 
@@ -81,7 +84,7 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
     
     // Configure the cell...
-    TLitem *entry = [self.fetchedResultsController objectAtIndexPath:indexPath];
+    TLitem *entry = [self.ownerItems objectAtIndex:indexPath.row];
     cell.textLabel.text = entry.text;
     
     return cell;

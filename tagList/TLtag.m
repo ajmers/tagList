@@ -13,6 +13,6 @@
 @implementation TLtag
 
 @dynamic text;
-@dynamic tag_belongs_to_items;
+@dynamic items;
 
 @end

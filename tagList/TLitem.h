@@ -14,14 +14,14 @@
 @interface TLitem : NSManagedObject
 
 @property (nonatomic, retain) NSString * text;
-@property (nonatomic, retain) NSSet *item_has_tags;
+@property (nonatomic, retain) NSSet *tags;
 @end
 
 @interface TLitem (CoreDataGeneratedAccessors)
 
-- (void)addItem_has_tagsObject:(TLtag *)value;
-- (void)removeItem_has_tagsObject:(TLtag *)value;
-- (void)addItem_has_tags:(NSSet *)values;
-- (void)removeItem_has_tags:(NSSet *)values;
+- (void)addTagsObject:(TLtag *)value;
+- (void)removeTagsObject:(TLtag *)value;
+- (void)addTags:(NSSet *)values;
+- (void)removeTags:(NSSet *)values;
 
 @end

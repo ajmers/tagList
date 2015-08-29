@@ -13,6 +13,6 @@
 @implementation TLitem
 
 @dynamic text;
-@dynamic item_has_tags;
+@dynamic tags;
 
 @end
