@@ -30,6 +30,10 @@
     _ownerItems = items;
 }
 
+- (void)viewDidUnload {
+    self.fetchedResultsController = nil;
+}
+
 -(void)dismissSelf {
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
@@ -68,6 +72,7 @@
     [fetchRequest setPredicate:tagPredicate];
     
     [fetchRequest setSortDescriptors:sortDescriptors];
+    [fetchRequest setFetchBatchSize:20];
 
     return fetchRequest;
 }

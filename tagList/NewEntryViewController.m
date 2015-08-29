@@ -11,18 +11,19 @@
 #import "TLtag.h"
 #import "CoreDataStack.h"
 
-@interface NewEntryViewController ()
+@interface NewEntryViewController () <UITableViewDelegate, UITableViewDataSource>
 
 @property (strong, nonatomic) IBOutlet UITextField *textField;
-
+@property (strong, nonatomic) NSFetchedResultsController* existingTagsFetchedResultsController;
 @end
 
 @implementation NewEntryViewController
 
-
-
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [self.existingTagsFetchedResultsController performFetch:nil];
+    
+
     // Do any additional setup after loading the view.
 }
 
@@ -46,6 +47,8 @@
 }
 
 
+// Parsing text and adding item & tags.
+
 -(void)insertListItem {
     CoreDataStack *coreDataStack = [CoreDataStack defaultStack];
     TLitem *entry = [NSEntityDescription insertNewObjectForEntityForName:@"TLitem"
@@ -57,7 +60,6 @@
                                   regularExpressionWithPattern:pattern
                                   options:NSRegularExpressionCaseInsensitive
                                   error:&error];
-    
     
     NSString *contentNoTags = [regex stringByReplacingMatchesInString:content options:0 range:NSMakeRange(0, [content length]) withTemplate:@""];
     NSString *trimmedContentNoTags = [contentNoTags stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -72,17 +74,64 @@
 
     for (NSTextCheckingResult *match in tagsArray) {
         NSRange matchRange = [match rangeAtIndex:1];
-        TLtag *tag = [NSEntityDescription insertNewObjectForEntityForName:@"TLtag"
-                                                      inManagedObjectContext:coreDataStack.managedObjectContext];
         NSString* tagName = [content substringWithRange:matchRange];
-        [tag setText:tagName];
-        [entry addTagsObject:tag];
-        [tag addItemsObject:entry];
+        
+        TLtag *existingTag = [self getExistingTag:tagName];
+        
+        TLtag *tag = (existingTag != nil) ? existingTag : [NSEntityDescription insertNewObjectForEntityForName:@"TLtag"
+                inManagedObjectContext:coreDataStack.managedObjectContext];
+
+        if (!!existingTag) {
+            [tag addItemsObject:entry];
+        } else {
+            [tag addItemsObject:entry];
+            [tag setText:tagName];
+            [entry addTagsObject:tag];
+        }
     }
     
     [coreDataStack saveContext];
+}
 
+- (TLtag *)getExistingTag:(NSString *)tagName {
+    NSArray *existingTags = self.existingTagsFetchedResultsController.fetchedObjects;
     
+    for (TLtag *item in existingTags) {
+        
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text MATCHES %@", tagName];
+        NSArray *filteredArray = [existingTags filteredArrayUsingPredicate:predicate];
+        if ([filteredArray count] > 0) {
+            return [filteredArray objectAtIndex:0];
+        }
+    }
+    return nil;
+    
+}
+
+- (NSFetchRequest *)existingTagsFetchRequest {
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TLtag"];
+    
+    // Edit the sort key as appropriate.
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"text" ascending:NO];
+    NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
+    
+    [fetchRequest setSortDescriptors:sortDescriptors];
+    
+    return fetchRequest;
+}
+
+- (NSFetchedResultsController *)existingTagsFetchedResultsController {
+    if (_existingTagsFetchedResultsController != nil) {
+        return _existingTagsFetchedResultsController;
+    }
+    
+    CoreDataStack *coreDataStack = [CoreDataStack defaultStack];
+    NSFetchRequest *existingTagsFetchRequest = [self existingTagsFetchRequest];
+    
+    _existingTagsFetchedResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:existingTagsFetchRequest managedObjectContext:coreDataStack.managedObjectContext sectionNameKeyPath:nil cacheName:nil];
+    _existingTagsFetchedResultsController.delegate = self;
+    
+    return _existingTagsFetchedResultsController;
 }
 
 - (IBAction)doneWasPressed:(id)sender {

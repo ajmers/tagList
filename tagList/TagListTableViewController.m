@@ -26,6 +26,10 @@
     [self.fetchedResultsController performFetch:nil];
 }
 
+- (void)viewDidUnload {
+    self.fetchedResultsController = nil;
+}
+
 - (void) viewDidAppear {
     NSLog(@"view will appear");
 }
@@ -52,7 +56,7 @@
     NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TLtag"];
     
     // Edit the sort key as appropriate.
-    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"text" ascending:NO];
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"text" ascending:YES];
     NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
     
     [fetchRequest setSortDescriptors:sortDescriptors];
