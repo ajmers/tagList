@@ -56,13 +56,19 @@
 }
 
 -(void)createMatchingTagsArray {
-//    NSPredicate *pre = [NSPredicate predicateWithFormat:@"attribute CONTAINS [cd] %@", searchString];
-//    NSArray *searchResults = [[self.fetchedResultsController fetchedObjects] filteredArrayUsingPredicate:pre]
-
-    
-    
     NSArray* tagsList = [self.existingTagsFetchedResultsController fetchedObjects];
     _matchingTagsArray = [[NSMutableArray alloc] initWithArray:tagsList];
+    NSLog(@"matching tags array was created.");
+}
+
+-(void)resetMatchingTagsArray {
+    if ([_matchingTagsArray count] != [[self.existingTagsFetchedResultsController fetchedObjects] count]) {
+        // When backspace is pressed, reset matchingTagsArray to retrieve ALL tags, then be
+        [self createMatchingTagsArray];
+        NSLog(@"matching tags array was reset.");
+    } else {
+        NSLog(@"ALREADY reset.");
+    }
 }
 
 -(void)createAutocompleteTableView {
@@ -76,42 +82,68 @@
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
     
-    //Check if the current character (string) is #. If so, set _tagBeginRange to [range.location, 0]; increment the
-    // range.length as we continue typing.
-
+    NSLog(string);
+    if (textField.text.length == 0) {
+        _isTypingTag = NO;
+        [self resetMatchingTagsArray];
+        return YES;
+    } else {
+        NSString *pattern = @"\s#[\S]+$";
+        NSPredicate *isTypingTag = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", pattern];
+        
+        if ([isTypingTag evaluateWithObject: self.textField.text]){
+            _isTypingTag = NO;
+        }
+    }
     if ([string isEqualToString:@"#"]) {
+        NSLog(@"#, starting hashtag.");
+        [self resetMatchingTagsArray];
         _isTypingTag = YES;
         _tableView.hidden = NO;
         _tagRange = NSMakeRange (range.location, 0);
-
+        [self resetMatchingTagsArray];
+    } else if ([string isEqualToString:@" "]) {
+            NSLog(@"space, set typingTag to NO.");
+            _isTypingTag = NO;
+            _tableView.hidden = YES;
+        
     } else if (_isTypingTag) {
-        
+        if (range.length==1 && string.length==0) {
+            NSLog(@"backspace, reset results.");
+            [self resetMatchingTagsArray];
+        }
         _tagRange.length = range.location - _tagRange.location;
-        NSString *substring = [textField.text substringWithRange:_tagRange];
-//        NSString *substring = [NSString stringWithString:textField.text];
-//        substring = [substring
-//                     stringByReplacingCharactersInRange:_tagBeginRange withString:string];
         
-        [self searchAutocompleteEntriesWithSubstring:substring];
+        NSMutableString *fullTagSoFar = [NSMutableString stringWithString:_textField.text];
+        fullTagSoFar = [[fullTagSoFar substringWithRange:_tagRange] stringByAppendingString:string];
+
+        [self searchAutocompleteEntriesWithSubstring:fullTagSoFar];
     }
+    [_tableView reloadData];
     
     return YES;
 }
 
 - (void)searchAutocompleteEntriesWithSubstring:(NSString *)substring {
-    NSMutableArray *autocompleteTags = [[NSMutableArray alloc] init];
-    
-    // Put anything that contains with this substring into the autocompleteUrls array
-    // The items in this array is what will show up in the table view
-    for(TLtag *curTag in _matchingTagsArray) {
-        NSString *curString = [curTag valueForKey:@"text"];
-        NSRange substringRange = [curString rangeOfString:substring];
-        if (substringRange.location != 0) {
-            [autocompleteTags removeObject:curTag];
+    NSMutableArray *autocompleteTags = [[NSMutableArray alloc] initWithArray:_matchingTagsArray];
+    NSLog(substring);
+    if (substring.length) {
+        // Put anything that contains with this substring into the autocompleteUrls array
+        // The items in this array is what will show up in the table view
+        for(TLtag *curTag in _matchingTagsArray) {
+            NSString *curString = [curTag valueForKey:@"text"];
+            NSRange substringRange = [curString rangeOfString:substring];
+            if (substringRange.location != 0) {
+                //NSLog(@'tag %@ found in existingTags', substring);
+                
+                [autocompleteTags removeObject:curTag];
+            }
         }
+        _matchingTagsArray = autocompleteTags;
     }
-    _matchingTagsArray = autocompleteTags;
-    [_tableView reloadData];
+    if ([_matchingTagsArray count] == 0) {
+        _tableView.hidden = true;
+    }
 }
 
 // Autocompleting search table
@@ -135,7 +167,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return _existingTagsFetchedResultsController.fetchedObjects.count;
+    return _matchingTagsArray.count;
 };
 
 

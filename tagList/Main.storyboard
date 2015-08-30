@@ -90,13 +90,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="DQc-01-HON">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="DQc-01-HON">
                                 <rect key="frame" x="16" y="109" width="568" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="UMf-w4-aCv">
-                                <rect key="frame" x="16" y="147" width="410" height="203"/>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="UMf-w4-aCv">
+                                <rect key="frame" x="16" y="147" width="568" height="433"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" id="zrj-w2-YDo">
@@ -111,8 +111,13 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="UMf-w4-aCv" firstAttribute="leading" secondItem="hzc-O7-ucS" secondAttribute="leadingMargin" constant="20" id="3cz-uo-UQE"/>
-                            <constraint firstItem="UMf-w4-aCv" firstAttribute="trailing" secondItem="hzc-O7-ucS" secondAttribute="trailingMargin" constant="20" id="xTA-Wy-k2x"/>
+                            <constraint firstItem="DQc-01-HON" firstAttribute="top" secondItem="865-lw-oKy" secondAttribute="bottom" constant="45" id="0mJ-LF-fKU"/>
+                            <constraint firstItem="DQc-01-HON" firstAttribute="leading" secondItem="hzc-O7-ucS" secondAttribute="leadingMargin" id="1lE-nv-9V3"/>
+                            <constraint firstItem="UMf-w4-aCv" firstAttribute="trailing" secondItem="DQc-01-HON" secondAttribute="trailing" id="79O-cX-EO6"/>
+                            <constraint firstAttribute="bottom" secondItem="UMf-w4-aCv" secondAttribute="bottom" constant="20" symbolic="YES" id="MCI-6N-cdm"/>
+                            <constraint firstItem="UMf-w4-aCv" firstAttribute="top" secondItem="DQc-01-HON" secondAttribute="bottom" constant="8" symbolic="YES" id="QIB-yy-5vO"/>
+                            <constraint firstItem="DQc-01-HON" firstAttribute="trailing" secondItem="hzc-O7-ucS" secondAttribute="trailingMargin" id="UyB-TK-uOf"/>
+                            <constraint firstItem="UMf-w4-aCv" firstAttribute="leading" secondItem="DQc-01-HON" secondAttribute="leading" id="hlq-8E-9eB"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="e7r-Lo-sAX">
