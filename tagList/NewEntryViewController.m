@@ -82,19 +82,26 @@
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
     
-    NSLog(string);
-    if (textField.text.length == 0) {
+    NSString *textFieldText = _textField.text;
+    NSMutableString *textPlusString = [NSMutableString stringWithString:textFieldText];
+    textPlusString = [textPlusString stringByAppendingString:string];
+    
+    NSLog(textPlusString);
+    if (textPlusString == 0) {
         _isTypingTag = NO;
+        _tableView.hidden = YES;
         [self resetMatchingTagsArray];
         return YES;
     } else {
-        NSString *pattern = @"\s#[\S]+$";
-        NSPredicate *isTypingTag = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", pattern];
-        
-        if ([isTypingTag evaluateWithObject: self.textField.text]){
+        NSString *pattern = @"\\s#[\\S]*$";
+        if (![self validateString:textPlusString withPattern:pattern]) {
+            NSLog(@"Don't seem to be typing a tag, based on regex.");
             _isTypingTag = NO;
+            _tableView.hidden = YES;
+            return YES;
         }
     }
+    
     if ([string isEqualToString:@"#"]) {
         NSLog(@"#, starting hashtag.");
         [self resetMatchingTagsArray];
@@ -114,8 +121,7 @@
         }
         _tagRange.length = range.location - _tagRange.location;
         
-        NSMutableString *fullTagSoFar = [NSMutableString stringWithString:_textField.text];
-        fullTagSoFar = [[fullTagSoFar substringWithRange:_tagRange] stringByAppendingString:string];
+        NSString* fullTagSoFar = [[textPlusString substringWithRange:_tagRange] stringByAppendingString:string];
 
         [self searchAutocompleteEntriesWithSubstring:fullTagSoFar];
     }
@@ -123,6 +129,27 @@
     
     return YES;
 }
+
+- (BOOL)validateString:(NSString *)string withPattern:(NSString *)pattern
+{
+    NSLog(@"%@ %@", string, pattern);
+    NSError *error = nil;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
+    
+    NSAssert(regex, @"Unable to create regular expression");
+    
+    NSRange textRange = NSMakeRange(0, string.length);
+    NSRange matchRange = [regex rangeOfFirstMatchInString:string options:NSMatchingReportProgress range:textRange];
+    
+    BOOL didValidate = NO;
+    
+    // Did we find a matching range
+    if (matchRange.location != NSNotFound)
+        didValidate = YES;
+    
+    return didValidate;
+}
+
 
 - (void)searchAutocompleteEntriesWithSubstring:(NSString *)substring {
     NSMutableArray *autocompleteTags = [[NSMutableArray alloc] initWithArray:_matchingTagsArray];
