@@ -21,6 +21,7 @@
 
 @property (nonatomic) NSRange tagRange;
 @property (nonatomic) BOOL isTypingTag;
+@property (nonatomic) NSRegularExpression *tagRegex;
 
 @end
 
@@ -81,65 +82,84 @@
 }
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
-    
-    NSString *textFieldText = _textField.text;
-    NSMutableString *textPlusString = [NSMutableString stringWithString:textFieldText];
-    textPlusString = [textPlusString stringByAppendingString:string];
-    
-    NSLog(textPlusString);
-    if (textPlusString == 0) {
-        _isTypingTag = NO;
-        _tableView.hidden = YES;
-        [self resetMatchingTagsArray];
-        return YES;
-    } else {
-        NSString *pattern = @"\\s#[\\S]*$";
-        if (![self validateString:textPlusString withPattern:pattern]) {
-            NSLog(@"Don't seem to be typing a tag, based on regex.");
-            _isTypingTag = NO;
-            _tableView.hidden = YES;
-            return YES;
-        }
-    }
+
+    BOOL shouldReset = NO;
     
     if ([string isEqualToString:@"#"]) {
-        NSLog(@"#, starting hashtag.");
-        [self resetMatchingTagsArray];
-        _isTypingTag = YES;
-        _tableView.hidden = NO;
+        NSLog(@"starting tag.");
         _tagRange = NSMakeRange (range.location, 0);
-        [self resetMatchingTagsArray];
-    } else if ([string isEqualToString:@" "]) {
-            NSLog(@"space, set typingTag to NO.");
-            _isTypingTag = NO;
-            _tableView.hidden = YES;
-        
-    } else if (_isTypingTag) {
-        if (range.length==1 && string.length==0) {
-            NSLog(@"backspace, reset results.");
+        _isTypingTag = YES;
+        shouldReset = YES;
+    // character is a space after a tag
+    } else if (_isTypingTag && [string isEqualToString:@" "]) {
+        NSLog(@"Space, setting typingTag to no.");
+        _isTypingTag = NO;
+        shouldReset = true;
+    // user input more than one letter, such by pasting.
+    } else if (string.length > 1 && [self validateString:_textField.text]) {
+        NSLog(@"Multiple");
+        _isTypingTag = YES;
+    // backspace and removed hashtag
+    } else if (string.length == 0 && _tagRange.location == range.location) {
+        NSLog(@"Backspace");
+        _isTypingTag = NO;
+    } else if (string.length == 0) {
+        shouldReset = YES;
+    }
+    
+    if (_isTypingTag) {
+        _tableView.hidden = false;
+        if (shouldReset) {
             [self resetMatchingTagsArray];
         }
-        _tagRange.length = range.location - _tagRange.location;
-        
-        NSString* fullTagSoFar = [[textPlusString substringWithRange:_tagRange] stringByAppendingString:string];
 
-        [self searchAutocompleteEntriesWithSubstring:fullTagSoFar];
+        _tagRange.length = range.location - _tagRange.location;
+        NSString* textFieldText = [[NSString alloc] initWithString:textField.text];
+        NSMutableString *currentTagText = [[NSMutableString alloc] init];
+        currentTagText = [textFieldText substringWithRange:_tagRange];
+                                                                   
+        [self searchAutocompleteEntriesWithSubstring:currentTagText andString:string];
+    } else {
+        _tableView.hidden = true;
     }
     [_tableView reloadData];
     
     return YES;
 }
 
-- (BOOL)validateString:(NSString *)string withPattern:(NSString *)pattern
-{
-    NSLog(@"%@ %@", string, pattern);
-    NSError *error = nil;
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath
+                                                                    *)indexPath {
     
-    NSAssert(regex, @"Unable to create regular expression");
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+    NSString *tag = [NSString stringWithString:cell.textLabel.text];
+    
+    NSMutableString *textFieldText = [[NSMutableString alloc] init];
+    textFieldText = [NSMutableString stringWithString:_textField.text];
+    NSLog(textFieldText);
+    NSLog(tag);
+    
+    NSRange replaceRange = NSMakeRange(_tagRange.location, 1);
+    [textFieldText replaceCharactersInRange:replaceRange withString:tag];
+    [textFieldText appendString:@" "];
+    _tagRange.location += tag.length + 1;
+    [_textField setText: textFieldText];
+}
+
+- (BOOL)validateString:(NSString *)string
+{
+    NSLog(@"%@", string);
+    NSError *error = nil;
+    if (!_tagRegex) {
+        NSString *pattern = @"\\s#[\\S]*$";
+        _tagRegex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
+    }
+    
+    NSAssert(_tagRegex, @"Unable to create regular expression");
     
     NSRange textRange = NSMakeRange(0, string.length);
-    NSRange matchRange = [regex rangeOfFirstMatchInString:string options:NSMatchingReportProgress range:textRange];
+    NSRange matchRange = [_tagRegex rangeOfFirstMatchInString:string options:NSMatchingReportProgress range:textRange];
     
     BOOL didValidate = NO;
     
@@ -151,18 +171,18 @@
 }
 
 
-- (void)searchAutocompleteEntriesWithSubstring:(NSString *)substring {
+- (void)searchAutocompleteEntriesWithSubstring:(NSString *)substring andString:(NSString*)string {
     NSMutableArray *autocompleteTags = [[NSMutableArray alloc] initWithArray:_matchingTagsArray];
+    
     NSLog(substring);
     if (substring.length) {
-        // Put anything that contains with this substring into the autocompleteUrls array
+        // Put anything that contains this substring into the autocomplete array
         // The items in this array is what will show up in the table view
         for(TLtag *curTag in _matchingTagsArray) {
             NSString *curString = [curTag valueForKey:@"text"];
             NSRange substringRange = [curString rangeOfString:substring];
             if (substringRange.location != 0) {
                 //NSLog(@'tag %@ found in existingTags', substring);
-                
                 [autocompleteTags removeObject:curTag];
             }
         }
