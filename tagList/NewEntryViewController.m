@@ -21,6 +21,7 @@
 
 @property (nonatomic) NSRange tagRange;
 @property (nonatomic) BOOL isTypingTag;
+@property (nonatomic) BOOL shouldReplaceOneExtraChar;
 @property (nonatomic) NSRegularExpression *tagRegex;
 
 @end
@@ -84,6 +85,7 @@
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
 
     BOOL shouldReset = NO;
+    _shouldReplaceOneExtraChar = YES;
     
     if ([string isEqualToString:@"#"]) {
         NSLog(@"starting tag.");
@@ -101,9 +103,10 @@
         _isTypingTag = YES;
     // backspace and removed hashtag
     } else if (string.length == 0 && _tagRange.location == range.location) {
-        NSLog(@"Backspace");
+        NSLog(@"Backspaced past beginning of tag");
         _isTypingTag = NO;
     } else if (string.length == 0) {
+        _shouldReplaceOneExtraChar = NO;
         shouldReset = YES;
     }
     
@@ -114,6 +117,7 @@
         }
 
         _tagRange.length = range.location - _tagRange.location;
+        NSLog(@"Updated tag length.");
         NSString* textFieldText = [[NSString alloc] initWithString:textField.text];
         NSMutableString *currentTagText = [[NSMutableString alloc] init];
         currentTagText = [textFieldText substringWithRange:_tagRange];
@@ -140,10 +144,11 @@
     NSLog(textFieldText);
     NSLog(tag);
     
-    NSRange replaceRange = NSMakeRange(_tagRange.location, 1);
+    NSInteger *tagReplaceLength = _shouldReplaceOneExtraChar ? _tagRange.length + 1 : _tagRange.length;
+    NSRange replaceRange = NSMakeRange(_tagRange.location, tagReplaceLength);
     [textFieldText replaceCharactersInRange:replaceRange withString:tag];
     [textFieldText appendString:@" "];
-    _tagRange.location += tag.length + 1;
+    _tagRange.length = tag.length;
     [_textField setText: textFieldText];
 }
 
