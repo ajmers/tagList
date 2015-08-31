@@ -148,8 +148,12 @@
     NSRange replaceRange = NSMakeRange(_tagRange.location, tagReplaceLength);
     [textFieldText replaceCharactersInRange:replaceRange withString:tag];
     [textFieldText appendString:@" "];
-    _tagRange.length = tag.length;
     [_textField setText: textFieldText];
+
+    // Reset the tagRange so they can select another one.
+    _tagRange.location = textFieldText.length - 1;
+    _shouldReplaceOneExtraChar = YES;
+    _tagRange.length = 0;
 }
 
 - (BOOL)validateString:(NSString *)string
