@@ -94,14 +94,12 @@
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-    NSString *tag = [NSString stringWithString:cell.text];
+    NSString *tag = [NSString stringWithString:cell.textLabel.text];
     
     //Build a segue string based on the selected cell
     NSString *segueString = @"showEntriesForTag";
     //Since contentArray is an array of strings, we can use it to build a unique
     //identifier for each segue.
-
-    //[self prepareForSegue:segueString sender:tag];
     
     //Perform a segue.
     [self performSegueWithIdentifier:segueString
@@ -112,7 +110,6 @@
     if ([segue.identifier isEqualToString:@"showEntriesForTag"]) {
         EntryListTableViewController *entryList = (EntryListTableViewController*)[[[segue destinationViewController] viewControllers] objectAtIndex:0];
         [entryList setTag:(NSString*)sender];
-        //= sender;
     }
 }
 

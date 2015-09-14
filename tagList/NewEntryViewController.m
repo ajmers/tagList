@@ -21,7 +21,7 @@
 
 @property (nonatomic) NSRange tagRange;
 @property (nonatomic) BOOL isTypingTag;
-@property (nonatomic) BOOL shouldReplaceOneExtraChar;
+@property (nonatomic) BOOL shouldReplacePreviousChar;
 @property (nonatomic) NSRegularExpression *tagRegex;
 
 @end
@@ -85,7 +85,7 @@
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
 
     BOOL shouldReset = NO;
-    _shouldReplaceOneExtraChar = YES;
+    _shouldReplacePreviousChar = YES;
     
     if ([string isEqualToString:@"#"]) {
         NSLog(@"starting tag.");
@@ -106,7 +106,7 @@
         NSLog(@"Backspaced past beginning of tag");
         _isTypingTag = NO;
     } else if (string.length == 0) {
-        _shouldReplaceOneExtraChar = NO;
+        _shouldReplacePreviousChar = NO;
         shouldReset = YES;
     }
     
@@ -141,19 +141,28 @@
     
     NSMutableString *textFieldText = [[NSMutableString alloc] init];
     textFieldText = [NSMutableString stringWithString:_textField.text];
-    NSLog(textFieldText);
-    NSLog(tag);
     
-    NSInteger *tagReplaceLength = _shouldReplaceOneExtraChar ? _tagRange.length + 1 : _tagRange.length;
-    NSRange replaceRange = NSMakeRange(_tagRange.location, tagReplaceLength);
-    [textFieldText replaceCharactersInRange:replaceRange withString:tag];
+    // if they typed a '#', we need to include it in the replacement range.
+    // if they're just selecting more stuff from the list without typing a '#',
+    // don't go back one to replace the last character.
+    
+    unichar charAtLocation = [textFieldText characterAtIndex:_tagRange.location];
+    
+    if (charAtLocation == '#') {
+        _shouldReplacePreviousChar = YES;
+        NSInteger tagReplaceLength = _shouldReplacePreviousChar ? _tagRange.length + 1 : _tagRange.length;
+        NSRange replaceRange = NSMakeRange(_tagRange.location, tagReplaceLength);
+        [textFieldText replaceCharactersInRange:replaceRange withString:tag];
+    } else {
+        [textFieldText appendString:tag];
+    }
+    
     [textFieldText appendString:@" "];
     [_textField setText: textFieldText];
 
     // Reset the tagRange so they can select another one.
     _tagRange.location = textFieldText.length - 1;
-    _shouldReplaceOneExtraChar = YES;
-    _tagRange.length = 0;
+    _shouldReplacePreviousChar = NO;
 }
 
 - (BOOL)validateString:(NSString *)string
