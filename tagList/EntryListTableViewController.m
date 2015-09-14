@@ -8,6 +8,7 @@
 
 #import "EntryListTableViewController.h"
 #import "CoreDataStack.h"
+#import "DetailsViewController.h"
 #import "TLitem.h"
 #import "TLtag.h"
 
@@ -31,7 +32,7 @@
 }
 
 - (void)viewDidUnload {
-    self.fetchedResultsController = nil;
+    //self.fetchedResultsController = nil;
 }
 
 -(void)dismissSelf {
@@ -109,6 +110,19 @@
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
+    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+    TLitem *entry = [_ownerItems objectAtIndex:indexPath.row];
+   
+    
+    //Build a segue string based on the selected cell
+    NSString *segueString = @"showDetailsForEntry";
+    //Since contentArray is an array of strings, we can use it to build a unique
+    //identifier for each segue.
+    
+    //Perform a segue.
+    [self performSegueWithIdentifier:segueString
+                              sender:entry];
+    
 }
 
 -(void)controllerDidChangeContent:(NSFetchedResultsController *)controller {
@@ -149,15 +163,19 @@
 }
 */
 
-/*
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
+    if ([segue.identifier isEqualToString:@"showDetailsForEntry"]) {
+        DetailsViewController *entryDetails = (DetailsViewController *)[segue destinationViewController];
+        
+        [entryDetails setEntry:(TLitem *)sender];
+    }
 }
-*/
+
 - (IBAction)backWasPressed:(id)sender {
     [self dismissSelf];
 }
