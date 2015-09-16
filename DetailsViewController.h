@@ -12,7 +12,6 @@
 @interface DetailsViewController : UIViewController
 
 @property (nonatomic, strong) TLitem *entry;
-
 @property (weak, nonatomic) IBOutlet UILabel *entryLabel;
 
 @end

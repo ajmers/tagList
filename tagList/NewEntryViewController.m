@@ -329,11 +329,11 @@
 
 - (IBAction)doneWasPressed:(id)sender {
     [self insertListItem];
-    [self dismissSelf];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (IBAction)cancelWasPressed:(id)sender {
-    [self dismissSelf];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 @end

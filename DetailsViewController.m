@@ -21,17 +21,19 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [self.view setBackgroundColor:[UIColor whiteColor]];
     TLitem *entry = [self entry];
     UILabel *label = [self entryLabel];
     
     label.text = [entry valueForKey:@"text"];
+    [label setBackgroundColor:[UIColor whiteColor]];
     _top = 200;
     
     NSArray *tags = [entry valueForKey:@"tags"];
     for (TLtag *tag in tags) {
-        UILabel *label = [self createSizedLabelFromText:[tag valueForKey:@"text"]];
+        UILabel *tagLabel = [self createSizedLabelFromText:[tag valueForKey:@"text"]];
         _top += 50;
-        [[self view] addSubview:label];
+        [[self view] addSubview:tagLabel];
     }
 }
 
@@ -41,7 +43,7 @@
     [label setFrame:CGRectMake(40,_top,stringsize.width,stringsize.height)];
     [label setText: tag];
     label.layer.masksToBounds = YES;
-    label.layer.cornerRadius = 8.0;
+    label.layer.cornerRadius = 15.0;
     [label setBackgroundColor:[self generateColorWithSaturation:(CGFloat).5]];
     return label;
 }

@@ -96,20 +96,16 @@
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     NSString *tag = [NSString stringWithString:cell.textLabel.text];
     
-    //Build a segue string based on the selected cell
-    NSString *segueString = @"showEntriesForTag";
-    //Since contentArray is an array of strings, we can use it to build a unique
-    //identifier for each segue.
+    EntryListTableViewController *entryList = [self.storyboard instantiateViewControllerWithIdentifier:@"EntryList"];
+    [entryList setTag:tag];
+    [self.navigationController pushViewController:entryList animated:YES];
     
-    //Perform a segue.
-    [self performSegueWithIdentifier:segueString
-                              sender:tag];
 }
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([segue.identifier isEqualToString:@"showEntriesForTag"]) {
-        EntryListTableViewController *entryList = (EntryListTableViewController*)[[[segue destinationViewController] viewControllers] objectAtIndex:0];
-        [entryList setTag:(NSString*)sender];
+        EntryListTableViewController *entryList = (EntryListTableViewController*)[segue destinationViewController];
+        [entryList setTag:(NSString*)[sender text]];
     }
 }
 
@@ -125,17 +121,23 @@
  }
  */
 
-/*
  // Override to support editing the table view.
  - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
- if (editingStyle == UITableViewCellEditingStyleDelete) {
- // Delete the row from the data source
- [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
- } else if (editingStyle == UITableViewCellEditingStyleInsert) {
- // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+     if (editingStyle == UITableViewCellEditingStyleDelete) {
+         // Delete the row from the data source
+         UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+         TLtag *tag = [[[self fetchedResultsController] fetchedObjects] objectAtIndex:indexPath.row];
+         [self removeTagEntry:tag];
+         
+     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
+        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+    }
  }
- }
- */
+
+- (void) removeTagEntry: (TLtag *)tag {
+    CoreDataStack *coreDataStack = [CoreDataStack defaultStack];
+    [coreDataStack.managedObjectContext deleteObject:tag];
+}
 
 /*
  // Override to support rearranging the table view.

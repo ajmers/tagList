@@ -35,10 +35,6 @@
     //self.fetchedResultsController = nil;
 }
 
--(void)dismissSelf {
-    [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
-}
-
 - (void) viewDidAppear {
     NSLog(@"view will appear");
 }
@@ -94,7 +90,11 @@
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
+    
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"Cell"];
+    }
     
     // Configure the cell...
     TLitem *entry = [self.ownerItems objectAtIndex:indexPath.row];
@@ -110,18 +110,11 @@
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     TLitem *entry = [_ownerItems objectAtIndex:indexPath.row];
-   
     
-    //Build a segue string based on the selected cell
-    NSString *segueString = @"showDetailsForEntry";
-    //Since contentArray is an array of strings, we can use it to build a unique
-    //identifier for each segue.
-    
-    //Perform a segue.
-    [self performSegueWithIdentifier:segueString
-                              sender:entry];
+    DetailsViewController *details = [self.storyboard instantiateViewControllerWithIdentifier:@"Details"];
+    [details setEntry:entry];
+    [self.navigationController pushViewController:details animated:YES];
     
 }
 
@@ -169,15 +162,10 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
-    if ([segue.identifier isEqualToString:@"showDetailsForEntry"]) {
-        DetailsViewController *entryDetails = (DetailsViewController *)[segue destinationViewController];
-        
-        [entryDetails setEntry:(TLitem *)sender];
-    }
 }
 
 - (IBAction)backWasPressed:(id)sender {
-    [self dismissSelf];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 @end
