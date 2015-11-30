@@ -12,6 +12,8 @@
 @interface DetailsViewController : UIViewController
 
 @property (nonatomic, strong) TLitem *entry;
+@property (weak, nonatomic) IBOutlet UIView *labelContainer;
 @property (weak, nonatomic) IBOutlet UILabel *entryLabel;
+@property (weak, nonatomic) IBOutlet UIView *pillsContainerView;
 
 @end

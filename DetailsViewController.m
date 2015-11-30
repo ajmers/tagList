@@ -8,6 +8,9 @@
 
 #import "DetailsViewController.h"
 #import <QuartzCore/QuartzCore.h>
+#import "UIView+borders.h"
+#import "tagPill.h"
+
 #import "TLitem.h"
 #import "TLtag.h"
 
@@ -21,31 +24,33 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self.view setBackgroundColor:[UIColor whiteColor]];
+    
     TLitem *entry = [self entry];
+    UIView *container = [self labelContainer];
     UILabel *label = [self entryLabel];
     
+    // container.layer.borderWidth=1;
+    [container addBottomBorderWithColor:[UIColor lightGrayColor] andWidth:1];
     label.text = [entry valueForKey:@"text"];
-    [label setBackgroundColor:[UIColor whiteColor]];
-    _top = 200;
+    _top = 0;
     
     NSArray *tags = [entry valueForKey:@"tags"];
     for (TLtag *tag in tags) {
-        UILabel *tagLabel = [self createSizedLabelFromText:[tag valueForKey:@"text"]];
+        tagPill *tagLabel = [self createPillWithText:[tag valueForKey:@"text"]];
         _top += 50;
-        [[self view] addSubview:tagLabel];
+        [[self pillsContainerView] addSubview:tagLabel];
     }
 }
 
-- (UILabel*)createSizedLabelFromText:(NSString *)tag {
+- (tagPill*)createPillWithText:(NSString *)tag {
     CGSize stringsize = [tag sizeWithFont:[UIFont systemFontOfSize:30]];
-    UILabel *label = [[UILabel alloc] init];
-    [label setFrame:CGRectMake(40,_top,stringsize.width,stringsize.height)];
-    [label setText: tag];
-    label.layer.masksToBounds = YES;
-    label.layer.cornerRadius = 15.0;
-    [label setBackgroundColor:[self generateColorWithSaturation:(CGFloat).5]];
-    return label;
+    
+    tagPill *pill = [[tagPill alloc] init];
+    [pill setText: tag];
+    [pill setFrame:CGRectMake(40,_top,stringsize.width,stringsize.height)];
+    [pill setBackgroundColor:[self generateColorWithSaturation:(CGFloat).5]];
+
+    return pill;
 }
 
 - (UIColor *)generateColorWithSaturation:(CGFloat)saturation { //0.5 to 1.0, away from white
