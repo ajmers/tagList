@@ -8,6 +8,7 @@
 
 #import "TagListTableViewController.h"
 #import "EntryListTableViewController.h"
+#import "NewEntryViewController.h"
 #import "CoreDataStack.h"
 #import "TLtag.h"
 
@@ -106,7 +107,7 @@
     if ([segue.identifier isEqualToString:@"showEntriesForTag"]) {
         EntryListTableViewController *entryList = (EntryListTableViewController*)[segue destinationViewController];
         [entryList setTag:(NSString*)[sender text]];
-    }
+    } 
 }
 
 -(void)controllerDidChangeContent:(NSFetchedResultsController *)controller {
